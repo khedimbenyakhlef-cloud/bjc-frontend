@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Beny-Joe Cloud — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0b0f'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-size='38' font-family='Arial'>☁️%3C/text%3E%3C/svg%3E"/>
+</head>
+<body class="dashboard-page">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon-sm"><i class="fa-solid fa-cloud-bolt"></i></div>
+      <span>BJC</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-section="apps" onclick="showSection('apps')">
+        <i class="fa-solid fa-cubes"></i><span>Applications</span>
+      </a>
+      <a href="#" class="nav-item" data-section="stats" onclick="showSection('stats')">
+        <i class="fa-solid fa-chart-line"></i><span>Statistiques</span>
+      </a>
+      <a href="#" class="nav-item" data-section="profile" onclick="showSection('profile')">
+        <i class="fa-solid fa-user-circle"></i><span>Profil</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="logout()">
+        <i class="fa-solid fa-right-from-bracket"></i><span>Déconnexion</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+      <div class="topbar-title" id="topbarTitle">Mes Applications</div>
+      <div class="topbar-user">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span id="userName">...</span>
+      </div>
+    </header>
+
+    <!-- SECTION: APPS -->
+    <section id="section-apps" class="section active">
+      <div class="section-header">
+        <div>
+          <h2>Applications</h2>
+          <p class="section-sub">Gérez et déployez vos projets</p>
+        </div>
+        <button class="btn-primary" onclick="openModal('createAppModal')">
+          <i class="fa-solid fa-plus"></i> Nouvelle app
+        </button>
+      </div>
+
+      <!-- STATS CARDS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-cubes"></i></div>
+          <div class="stat-info">
+            <span class="stat-value" id="statTotal">0</span>
+            <span class="stat-label">Total apps</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="stat-info">
+            <span class="stat-value" id="statRunning">0</span>
+            <span class="stat-label">En ligne</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fa-solid fa-rocket"></i></div>
+          <div class="stat-info">
+            <span class="stat-value" id="statDeployed">0</span>
+            <span class="stat-label">Déployées</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPS LIST -->
+      <div id="appsList" class="apps-grid">
+        <div class="loading-state">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <p>Chargement...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: STATS -->
+    <section id="section-stats" class="section">
+      <div class="section-header">
+        <div>
+          <h2>Statistiques</h2>
+          <p class="section-sub">Vue d'ensemble de votre activité</p>
+        </div>
+      </div>
+      <div class="stats-full">
+        <div class="stat-card-lg">
+          <i class="fa-solid fa-cubes"></i>
+          <div class="stat-value" id="statsApps">0</div>
+          <div class="stat-label">Applications</div>
+        </div>
+        <div class="stat-card-lg green">
+          <i class="fa-solid fa-bolt"></i>
+          <div class="stat-value" id="statsFunctions">0</div>
+          <div class="stat-label">Fonctions serverless</div>
+        </div>
+        <div class="stat-card-lg blue">
+          <i class="fa-solid fa-database"></i>
+          <div class="stat-value" id="statsDbs">0</div>
+          <div class="stat-label">Bases de données</div>
+        </div>
+      </div>
+      <div class="info-box">
+        <i class="fa-solid fa-circle-info"></i>
+        <p>Les métriques détaillées (requêtes, temps de réponse, CPU) seront disponibles avec un plan payant.</p>
+      </div>
+    </section>
+
+    <!-- SECTION: PROFILE -->
+    <section id="section-profile" class="section">
+      <div class="section-header">
+        <div>
+          <h2>Mon Profil</h2>
+          <p class="section-sub">Vos informations personnelles</p>
+        </div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-avatar" id="profileAvatar">?</div>
+        <div class="profile-info">
+          <h3 id="profileName">...</h3>
+          <p id="profileEmail">...</p>
+          <span class="badge" id="profilePlan">Free</span>
+        </div>
+      </div>
+      <div class="info-box">
+        <i class="fa-solid fa-shield-halved"></i>
+        <p>Compte sécurisé avec JWT. Token stocké localement et expirant automatiquement.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TOAST -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- MODAL: CREATE APP -->
+  <div class="modal-overlay" id="createAppModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Nouvelle Application</h3>
+        <button class="modal-close" onclick="closeModal('createAppModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nom de l'application</label>
+          <input type="text" id="newAppName" placeholder="mon-super-projet" />
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="newAppType" onchange="toggleRuntime()">
+            <option value="static">Site statique</option>
+            <option value="fullstack">Full-stack</option>
+          </select>
+        </div>
+        <div class="form-group" id="runtimeGroup" style="display:none">
+          <label>Runtime</label>
+          <select id="newAppRuntime">
+            <option value="nodejs18">Node.js 18</option>
+            <option value="nodejs20">Node.js 20</option>
+            <option value="python311">Python 3.11</option>
+            <option value="php82">PHP 8.2</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description (optionnel)</label>
+          <input type="text" id="newAppDesc" placeholder="Description de votre application" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('createAppModal')">Annuler</button>
+        <button class="btn-primary" onclick="createApp()">
+          <i class="fa-solid fa-plus"></i> Créer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DEPLOY -->
+  <div class="modal-overlay" id="deployModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Déployer <span id="deployAppName"></span></h3>
+        <button class="modal-close" onclick="closeModal('deployModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('deployFile').click()">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <p>Cliquez ou glissez votre fichier ZIP ici</p>
+          <span class="upload-hint">Format : .zip — Max 50MB</span>
+          <input type="file" id="deployFile" accept=".zip" style="display:none" onchange="fileSelected(this)"/>
+        </div>
+        <div id="selectedFile" style="display:none" class="selected-file">
+          <i class="fa-solid fa-file-zipper"></i>
+          <span id="selectedFileName"></span>
+          <button onclick="clearFile()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="deployProgress" style="display:none">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <p id="progressText" class="progress-text">Déploiement en cours...</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('deployModal')">Annuler</button>
+        <button class="btn-primary" id="deployBtn" onclick="deployApp()">
+          <i class="fa-solid fa-rocket"></i> Déployer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ENV VARS -->
+  <div class="modal-overlay" id="envModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>Variables d'environnement — <span id="envAppName"></span></h3>
+        <button class="modal-close" onclick="closeModal('envModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div id="envList" class="env-list"></div>
+        <div class="env-add">
+          <h4><i class="fa-solid fa-plus"></i> Ajouter une variable</h4>
+          <div class="env-form">
+            <input type="text" id="newEnvKey" placeholder="CLE" class="env-key"/>
+            <input type="text" id="newEnvValue" placeholder="valeur" class="env-value"/>
+            <label class="env-secret">
+              <input type="checkbox" id="newEnvSecret"/> Secret
+            </label>
+            <button class="btn-primary btn-sm" onclick="addEnvVar()">Ajouter</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('envModal')">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: FUNCTIONS -->
+  <div class="modal-overlay" id="functionsModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>Fonctions Serverless — <span id="funcAppName"></span></h3>
+        <button class="modal-close" onclick="closeModal('functionsModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div id="funcList" class="func-list"></div>
+        <div class="func-add">
+          <h4><i class="fa-solid fa-plus"></i> Nouvelle fonction</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nom</label>
+              <input type="text" id="newFuncName" placeholder="ma-fonction" />
+            </div>
+            <div class="form-group">
+              <label>Runtime</label>
+              <select id="newFuncRuntime">
+                <option value="nodejs18">Node.js 18</option>
+                <option value="python311">Python 3.11</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Code</label>
+            <textarea id="newFuncCode" class="code-editor" placeholder="// exports.handler = async (event) => { return { status: 200 }; }"></textarea>
+          </div>
+          <button class="btn-primary" onclick="createFunction()">
+            <i class="fa-solid fa-plus"></i> Créer la fonction
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('functionsModal')">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRM DELETE -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Supprimer l'application</h3>
+        <button class="modal-close" onclick="closeModal('deleteModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p>Êtes-vous sûr de vouloir supprimer <strong id="deleteAppName"></strong> ?</p>
+        <p class="text-danger">Cette action est irréversible.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('deleteModal')">Annuler</button>
+        <button class="btn-danger" onclick="confirmDelete()">
+          <i class="fa-solid fa-trash"></i> Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer site-footer--dashboard">
+    <span>☁️ Beny-Joe Cloud</span>
+    <span class="footer-sep">·</span>
+    <span>© 2026 khedim benyakhlef dit beny joe – Tous droits réservés</span>
+    <span class="footer-sep">·</span>
+    <a href="mailto:khedimbenyakhlef@gmail.com">khedimbenyakhlef@gmail.com</a>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
