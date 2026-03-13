@@ -71,7 +71,7 @@ const Apps = {
   deploy: async (id, file) => {
     const token = getToken();
     const form = new FormData();
-    form.append('file', file);
+    form.append('zipFile', file);
     const res = await fetch(`${API_BASE}/api/apps/${id}/deploy`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
