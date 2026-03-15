@@ -70,13 +70,16 @@ function renderApps(apps) {
     return;
   }
 
-  grid.innerHTML = apps.map(app => `
+  grid.innerHTML = apps.map(app => {
+    // URL fonctionnelle (Render)
+    const siteUrl = `https://bjc-v4.onrender.com/site/${app.slug || app.name}`;
+    return `
     <div class="app-card" id="app-${app.id}">
       <div class="app-card-header">
         <div>
           <div class="app-name">${escHtml(app.name)}</div>
           <div class="app-domain">
-            ${app.domain ? `<a href="https://${app.domain}" target="_blank">${app.domain}</a>` : app.slug || '—'}
+            <a href="${siteUrl}" target="_blank">${siteUrl}</a>
           </div>
         </div>
         <span class="app-badge ${getBadgeClass(app.status)}">${getStatusLabel(app.status)}</span>
@@ -95,13 +98,15 @@ function renderApps(apps) {
         <button class="btn-icon" title="Fonctions serverless" onclick="openFunctions('${app.id}', '${escHtml(app.name)}')">
           <i class="fa-solid fa-bolt"></i>
         </button>
-        ${app.domain ? `<a class="btn-icon green" href="https://${app.domain}" target="_blank" title="Voir le site"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : ''}
+        <a class="btn-icon green" href="${siteUrl}" target="_blank" title="Voir le site">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </a>
         <button class="btn-icon danger" title="Supprimer" onclick="openDelete('${app.id}', '${escHtml(app.name)}')">
           <i class="fa-solid fa-trash"></i>
         </button>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 function updateStats(apps) {
