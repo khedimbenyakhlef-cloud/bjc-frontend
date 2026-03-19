@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Beny-Joe Cloud — Panneau Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <!-- Favicon identique au dashboard -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0b0f'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-size='38' font-family='Arial'>🛡️%3C/text%3E%3C/svg%3E"/>
+  <style>
+    /* ════════════════════════════════════════
+       ADMIN EXTRAS — hérite de style.css BJC
+       Thème : Dark Industrial / Neon Accent
+       Fonts : Syne + DM Mono + Font Awesome
+    ════════════════════════════════════════ */
+
+    /* Sidebar violet admin */
+    .sidebar-admin .brand-icon-sm {
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    }
+    .sidebar-admin .nav-item.active {
+      background: rgba(124,58,237,0.18);
+      color: #a78bfa;
+      border-color: rgba(124,58,237,0.3);
+    }
+    .sidebar-admin .nav-item:hover {
+      background: rgba(124,58,237,0.08);
+      color: #c4b5fd;
+    }
+
+    .admin-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.3);
+      color: #a78bfa;
+      font-size: 10px; font-weight: 700; letter-spacing: .06em;
+      padding: 3px 9px; border-radius: 20px;
+      text-transform: uppercase;
+    }
+
+    /* ── KPI Cards ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 14px; margin-bottom: 24px;
+    }
+    .kpi {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      position: relative; overflow: hidden;
+      transition: all .2s;
+    }
+    .kpi:hover { border-color: var(--border-light); transform: translateY(-2px); }
+    .kpi::after {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    }
+    .kpi.purple::after { background: linear-gradient(90deg,#7c3aed,#a78bfa); }
+    .kpi.blue::after   { background: linear-gradient(90deg,var(--accent),#60a5fa); }
+    .kpi.green::after  { background: linear-gradient(90deg,var(--green),#4ade80); }
+    .kpi.orange::after { background: linear-gradient(90deg,var(--orange),#fbbf24); }
+    .kpi.red::after    { background: linear-gradient(90deg,var(--red),#f87171); }
+    .kpi-lbl { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); margin-bottom:8px; }
+    .kpi-val { font-size:1.9rem; font-weight:800; font-family:var(--font-mono); color:var(--text-primary); line-height:1; margin-bottom:3px; }
+    .kpi-sub { font-size:11px; color:var(--text-muted); }
+    .kpi-ico { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:1.9rem; opacity:.07; }
+
+    /* ── Charts ── */
+    .chart-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 22px; margin-bottom: 16px;
+    }
+    .chart-title {
+      font-size:13px; font-weight:700; color:var(--text-primary);
+      display:flex; align-items:center; gap:8px; margin-bottom:14px;
+    }
+    .bar-chart { display:flex; align-items:flex-end; gap:6px; height:90px; }
+    .bc-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; }
+    .bc-bar { width:100%; border-radius:3px 3px 0 0; background:rgba(79,141,255,.18); transition:height .5s; cursor:default; }
+    .bc-bar:hover,.bc-bar.now { background:var(--accent); }
+    .bc-lbl { font-size:9px; color:var(--text-muted); font-family:var(--font-mono); }
+
+    .type-item { margin-bottom:10px; }
+    .type-hd { display:flex; justify-content:space-between; font-size:12px; color:var(--text-secondary); margin-bottom:5px; }
+    .type-track { height:5px; background:var(--bg-elevated); border-radius:3px; overflow:hidden; }
+    .type-fill { height:100%; border-radius:3px; transition:width .6s; }
+
+    /* ── Two col ── */
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+    @media(max-width:900px){.two-col{grid-template-columns:1fr;}}
+
+    /* ── Data Table Wrapper ── */
+    .dtw { background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:16px; }
+    .dth { display:flex; align-items:center; justify-content:space-between; padding:13px 18px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:10px; }
+    .dth-t { font-size:13px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
+    .cnt-badge { background:var(--accent-glow); color:var(--accent); border:1px solid rgba(79,141,255,.3); padding:2px 8px; border-radius:12px; font-size:10px; font-weight:700; font-family:var(--font-mono); }
+
+    /* Search */
+    .srch { display:flex; align-items:center; gap:7px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); padding:7px 12px; }
+    .srch i { color:var(--text-muted); font-size:12px; }
+    .srch input { background:none; border:none; outline:none; color:var(--text-primary); font-family:var(--font-main); font-size:12px; width:160px; }
+    .srch input::placeholder { color:var(--text-muted); }
+
+    /* Filter pills */
+    .fp { display:flex; gap:5px; padding:8px 18px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.015); flex-wrap:wrap; }
+    .fpill { padding:3px 11px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--text-muted); font-family:var(--font-main); font-size:11px; font-weight:600; cursor:pointer; transition:all .15s; }
+    .fpill:hover { border-color:var(--border-light); color:var(--text-secondary); }
+    .fpill.on { border-color:rgba(79,141,255,.4); background:var(--accent-glow); color:var(--accent); }
+
+    /* Table */
+    table { width:100%; border-collapse:collapse; }
+    thead { background:rgba(255,255,255,.02); }
+    th { padding:9px 14px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); border-bottom:1px solid var(--border); white-space:nowrap; }
+    td { padding:11px 14px; font-size:12px; color:var(--text-primary); border-bottom:1px solid rgba(42,47,69,.5); vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tbody tr { transition:background .12s; }
+    tbody tr:hover { background:rgba(255,255,255,.02); }
+
+    /* Status dot */
+    .drow { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; }
+    .d { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+    .dg { background:var(--green);  box-shadow:0 0 0 3px rgba(34,197,94,.2); }
+    .dr { background:var(--red);    box-shadow:0 0 0 3px rgba(239,68,68,.2); }
+    .do { background:var(--orange); box-shadow:0 0 0 3px rgba(245,158,11,.2); }
+    .dgr{ background:#555d78;       box-shadow:0 0 0 3px rgba(85,93,120,.2); }
+
+    /* Table action buttons */
+    .ta { display:flex; gap:5px; flex-wrap:wrap; }
+    .tb { padding:4px 9px; border-radius:5px; border:none; font-size:11px; font-weight:700; cursor:pointer; transition:all .15s; font-family:var(--font-main); white-space:nowrap; }
+    .tb.ban    { background:rgba(239,68,68,.1);  color:var(--red); }
+    .tb.ban:hover { background:var(--red); color:#fff; }
+    .tb.unban  { background:rgba(34,197,94,.1);  color:var(--green); }
+    .tb.unban:hover { background:var(--green); color:#fff; }
+    .tb.promo  { background:rgba(245,158,11,.1); color:var(--orange); }
+    .tb.promo:hover { background:var(--orange); color:#fff; }
+    .tb.view   { background:var(--accent-glow);  color:var(--accent); }
+    .tb.view:hover { background:var(--accent); color:#fff; }
+    .tb.del    { background:rgba(239,68,68,.08); color:#f87171; }
+    .tb.del:hover { background:var(--red); color:#fff; }
+
+    /* Pagination */
+    .pgn { display:flex; align-items:center; gap:3px; padding:10px 18px; border-top:1px solid var(--border); }
+    .pg { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:5px; border:1px solid var(--border); background:transparent; color:var(--text-muted); font-size:11px; font-weight:700; cursor:pointer; font-family:var(--font-main); transition:all .15s; }
+    .pg:hover,.pg.on { background:var(--accent-glow); color:var(--accent); border-color:rgba(79,141,255,.3); }
+    .pg-inf { font-size:11px; color:var(--text-muted); font-family:var(--font-mono); margin-left:auto; }
+
+    /* Monitor grid */
+    .mon-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:12px; }
+    .mc { background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:15px; transition:all .2s; }
+    .mc:hover { border-color:var(--border-light); transform:translateY(-1px); box-shadow:var(--shadow); }
+    .mc.err-card { border-left:3px solid var(--red); }
+    .mc-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+    .mc-name { font-size:14px; font-weight:700; color:var(--text-primary); }
+    .mc-owner { font-size:10px; color:var(--text-muted); font-family:var(--font-mono); margin-top:2px; }
+    .mc-domain { font-size:10px; color:var(--accent); font-family:var(--font-mono); margin-top:2px; word-break:break-all; }
+    .mc-metrics { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin:10px 0; }
+    .mc-m { background:var(--bg-elevated); border-radius:var(--radius-sm); padding:7px 10px; }
+    .mc-ml { font-size:9px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700; margin-bottom:2px; }
+    .mc-mv { font-size:15px; font-weight:800; font-family:var(--font-mono); color:var(--text-primary); }
+    .up-bar { margin-top:10px; }
+    .up-lbl { display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-bottom:3px; }
+    .up-track { height:3px; background:var(--bg-elevated); border-radius:2px; overflow:hidden; }
+    .up-fill { height:100%; border-radius:2px; transition:width .5s; }
+    .up-g { background:linear-gradient(90deg,var(--green),#4ade80); }
+    .up-o { background:linear-gradient(90deg,var(--orange),#fbbf24); }
+    .up-r { background:linear-gradient(90deg,var(--red),#f87171); }
+    .mc-actions { display:flex; gap:5px; margin-top:10px; flex-wrap:wrap; }
+
+    /* Activity */
+    .act-list { list-style:none; }
+    .act-item { display:flex; align-items:flex-start; gap:10px; padding:10px 18px; border-bottom:1px solid rgba(42,47,69,.5); }
+    .act-item:last-child { border-bottom:none; }
+    .act-ico { width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+    .act-ico.d { background:var(--accent-glow); color:var(--accent); }
+    .act-ico.u { background:rgba(34,197,94,.12); color:var(--green); }
+    .act-ico.c { background:rgba(124,58,237,.12); color:#a78bfa; }
+    .act-ico.e { background:var(--red-glow); color:var(--red); }
+    .act-txt { font-size:12px; color:var(--text-primary); line-height:1.4; flex:1; }
+    .act-meta { font-size:10px; color:var(--text-muted); font-family:var(--font-mono); margin-top:1px; }
+    .act-time { font-size:10px; color:var(--text-muted); font-family:var(--font-mono); white-space:nowrap; padding-top:1px; }
+
+    /* Storage bar */
+    .stor-track { height:10px; background:var(--bg-elevated); border-radius:5px; overflow:hidden; margin:10px 0; }
+    .stor-fill { height:100%; border-radius:5px; transition:width .6s; }
+
+    /* Topbar extras */
+    .clk { font-family:var(--font-mono); font-size:11px; color:var(--text-muted); padding:5px 10px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); }
+    .rfbtn { display:inline-flex; align-items:center; gap:5px; padding:7px 12px; background:var(--accent-glow); color:var(--accent); border:1px solid rgba(79,141,255,.3); border-radius:var(--radius-sm); font-size:11px; font-weight:700; cursor:pointer; font-family:var(--font-main); transition:all .2s; }
+    .rfbtn:hover { background:var(--accent); color:#fff; }
+    @keyframes spin2 { to { transform:rotate(360deg); } }
+    .rfbtn.sping i { animation:spin2 .6s linear infinite; display:inline-block; }
+
+    /* Warning banner */
+    .warn { display:flex; align-items:center; gap:10px; padding:10px 14px; background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.25); border-radius:var(--radius-sm); margin-bottom:18px; font-size:12px; color:#fca5a5; }
+    .warn i { color:var(--red); flex-shrink:0; }
+    .warn a { color:var(--accent); }
+
+    /* Skeletons */
+    @keyframes shim { 0%{background-position:-400px 0}100%{background-position:400px 0} }
+    .sk { background:linear-gradient(90deg,var(--bg-elevated) 25%,var(--border) 50%,var(--bg-elevated) 75%); background-size:400px 100%; animation:shim 1.4s infinite; border-radius:5px; }
+    .sk-v { height:26px; width:60px; display:inline-block; }
+  </style>
+</head>
+<body class="dashboard-page">
+
+  <!-- SIDEBAR — identique au dashboard BJC mais en mode admin -->
+  <aside class="sidebar sidebar-admin" id="sidebar">
+    <div class="sidebar-brand">
+      <!-- Logo identique : fa-cloud-bolt comme dashboard -->
+      <div class="brand-icon-sm"><i class="fa-solid fa-cloud-bolt"></i></div>
+      <span>BJC Admin</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div style="padding:3px 8px 7px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)">Vue globale</div>
+      <a href="#" class="nav-item active" onclick="goSection('overview',this)">
+        <i class="fa-solid fa-chart-line"></i><span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" onclick="goSection('monitoring',this)">
+        <i class="fa-solid fa-satellite-dish"></i><span>Monitoring</span>
+      </a>
+
+      <div style="padding:10px 8px 7px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)">Gestion</div>
+      <a href="#" class="nav-item" onclick="goSection('users',this)">
+        <i class="fa-solid fa-users"></i><span>Utilisateurs</span>
+      </a>
+      <a href="#" class="nav-item" onclick="goSection('apps',this)">
+        <i class="fa-solid fa-cubes"></i><span>Applications</span>
+      </a>
+      <a href="#" class="nav-item" onclick="goSection('deploys',this)">
+        <i class="fa-solid fa-rocket"></i><span>Déploiements</span>
+      </a>
+
+      <div style="padding:10px 8px 7px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)">Système</div>
+      <a href="#" class="nav-item" onclick="goSection('storage',this)">
+        <i class="fa-solid fa-hard-drive"></i><span>Stockage</span>
+      </a>
+      <a href="#" class="nav-item" onclick="goSection('activity',this)">
+        <i class="fa-solid fa-list-ul"></i><span>Activité</span>
+      </a>
+
+      <div style="padding:10px 8px 7px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)">Navigation</div>
+      <a href="dashboard.html" class="nav-item">
+        <i class="fa-solid fa-arrow-left"></i><span>Mon Dashboard</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div style="margin-bottom:8px">
+        <span class="admin-pill"><i class="fa-solid fa-shield-halved"></i> Administrateur</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="user-avatar" id="sidebarAvatar" style="width:30px;height:30px;font-size:12px;flex-shrink:0">?</div>
+        <div style="min-width:0">
+          <div style="font-size:12px;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sidebarName">...</div>
+          <div style="font-size:10px;color:var(--text-muted)">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- TOPBAR — identique au dashboard BJC -->
+    <header class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+      <div class="topbar-title" id="topbarTitle">
+        <i class="fa-solid fa-chart-line" style="color:var(--accent);margin-right:8px"></i>Dashboard Admin
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+        <span class="clk" id="adminClock">--:--:--</span>
+        <button class="rfbtn" id="rfBtn" onclick="refreshNow()">
+          <i class="fa-solid fa-rotate-right"></i> Actualiser
+        </button>
+        <button class="btn-logout" style="width:auto;padding:7px 12px" onclick="logout()">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Toast system — identique au dashboard BJC -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- ══════════════ SECTION OVERVIEW ══════════════ -->
+    <section id="sec-overview" class="section active">
+
+      <div class="warn">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>
+          Base de données expire le <strong>10 avril 2026</strong> —
+          Migrez vers <a href="https://neon.tech" target="_blank">Neon.tech</a>
+          (PostgreSQL gratuit, 500 Mo, sans expiration, aucun code à changer).
+        </span>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi purple"><div class="kpi-lbl">Utilisateurs</div><div class="kpi-val"><span class="sk sk-v"></span></div><div class="kpi-ico"><i class="fa-solid fa-users"></i></div></div>
+        <div class="kpi blue"><div class="kpi-lbl">Total Apps</div><div class="kpi-val"><span class="sk sk-v"></span></div><div class="kpi-ico"><i class="fa-solid fa-cubes"></i></div></div>
+        <div class="kpi green"><div class="kpi-lbl">En ligne</div><div class="kpi-val"><span class="sk sk-v"></span></div><div class="kpi-ico"><i class="fa-solid fa-circle-check"></i></div></div>
+        <div class="kpi orange"><div class="kpi-lbl">Déploiements / 24h</div><div class="kpi-val"><span class="sk sk-v"></span></div><div class="kpi-ico"><i class="fa-solid fa-rocket"></i></div></div>
+        <div class="kpi red"><div class="kpi-lbl">Apps en erreur</div><div class="kpi-val"><span class="sk sk-v"></span></div><div class="kpi-ico"><i class="fa-solid fa-circle-xmark"></i></div></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="two-col">
+        <div class="chart-box">
+          <div class="chart-title"><i class="fa-solid fa-chart-column" style="color:var(--accent)"></i>Déploiements — 7 derniers jours</div>
+          <div class="bar-chart" id="depChart"><div style="width:100%;text-align:center;color:var(--text-muted);font-size:12px;padding:16px"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title"><i class="fa-solid fa-chart-pie" style="color:#a78bfa"></i>Répartition des applications</div>
+          <div id="typeChart" style="margin-top:4px"><div style="color:var(--text-muted);font-size:12px"><i class="fa-solid fa-spinner fa-spin"></i></div></div>
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      <div class="dtw">
+        <div class="dth"><span class="dth-t"><i class="fa-solid fa-bolt" style="color:var(--accent)"></i>Activité récente</span></div>
+        <ul class="act-list" id="recentAct">
+          <li style="padding:1.5rem;text-align:center;color:var(--text-muted)"><i class="fa-solid fa-spinner fa-spin"></i></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ══════════════ SECTION MONITORING ══════════════ -->
+    <section id="sec-monitoring" class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h2 style="font-size:20px;font-weight:800">Monitoring temps réel</h2>
+          <p class="section-sub">Toutes les applications — statut, uptime, actions directes</p>
+        </div>
+        <div style="display:flex;gap:7px;align-items:center">
+          <span style="font-size:11px;color:var(--text-muted)">Auto-refresh :</span>
+          <button class="fpill on" id="arBtn" onclick="toggleAR()">ON</button>
+        </div>
+      </div>
+
+      <!-- Mon KPIs -->
+      <div class="kpi-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:18px">
+        <div class="kpi green"><div class="kpi-lbl">En ligne</div><div class="kpi-val" id="mOn">—</div><div class="kpi-ico"><i class="fa-solid fa-circle-check"></i></div></div>
+        <div class="kpi red"><div class="kpi-lbl">Erreur</div><div class="kpi-val" id="mErr">—</div><div class="kpi-ico"><i class="fa-solid fa-circle-xmark"></i></div></div>
+        <div class="kpi orange"><div class="kpi-lbl">Build</div><div class="kpi-val" id="mBld">—</div><div class="kpi-ico"><i class="fa-solid fa-gear"></i></div></div>
+        <div class="kpi blue"><div class="kpi-lbl">En attente</div><div class="kpi-val" id="mPnd">—</div><div class="kpi-ico"><i class="fa-solid fa-hourglass-half"></i></div></div>
+      </div>
+
+      <div class="fp" style="margin-bottom:14px;border:none;padding:0">
+        <button class="fpill on" onclick="fMon('all',this)">Toutes</button>
+        <button class="fpill" onclick="fMon('active',this)">🟢 En ligne</button>
+        <button class="fpill" onclick="fMon('error',this)">🔴 Erreur</button>
+        <button class="fpill" onclick="fMon('building',this)">⚙️ Build</button>
+        <button class="fpill" onclick="fMon('pending',this)">⏳ Attente</button>
+      </div>
+
+      <div class="mon-grid" id="monGrid">
+        <div style="grid-column:1/-1;text-align:center;padding:2.5rem;color:var(--text-muted)"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</div>
+      </div>
+    </section>
+
+    <!-- ══════════════ SECTION USERS ══════════════ -->
+    <section id="sec-users" class="section">
+      <div class="dtw">
+        <div class="dth">
+          <span class="dth-t"><i class="fa-solid fa-users" style="color:var(--accent)"></i>Utilisateurs <span class="cnt-badge" id="uCnt">0</span></span>
+          <div class="srch"><i class="fa-solid fa-search"></i><input type="text" placeholder="Nom ou email..." id="uSrch" oninput="fUsers(this.value)"></div>
+        </div>
+        <div class="fp">
+          <button class="fpill on" onclick="fURole('all',this)">Tous</button>
+          <button class="fpill" onclick="fURole('admin',this)">🛡️ Admins</button>
+          <button class="fpill" onclick="fURole('user',this)">👤 Users</button>
+          <button class="fpill" onclick="fURole('inactive',this)">⛔ Inactifs</button>
+        </div>
+        <table>
+          <thead><tr><th>Utilisateur</th><th>Email</th><th>Rôle</th><th>Apps</th><th>Plan</th><th>Inscrit</th><th>Statut</th><th>Actions</th></tr></thead>
+          <tbody id="uBody"><tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--text-muted)"><i class="fa-solid fa-spinner fa-spin"></i></td></tr></tbody>
+        </table>
+        <div class="pgn" id="uPgn"></div>
+      </div>
+    </section>
+
+    <!-- ══════════════ SECTION APPS ══════════════ -->
+    <section id="sec-apps" class="section">
+      <div class="dtw">
+        <div class="dth">
+          <span class="dth-t"><i class="fa-solid fa-cubes" style="color:var(--accent)"></i>Applications <span class="cnt-badge" id="aCnt">0</span></span>
+          <div class="srch"><i class="fa-solid fa-search"></i><input type="text" placeholder="App ou propriétaire..." id="aSrch" oninput="fApps(this.value)"></div>
+        </div>
+        <div class="fp">
+          <button class="fpill on" onclick="fAStatus('all',this)">Toutes</button>
+          <button class="fpill" onclick="fAStatus('active',this)">✅ Actives</button>
+          <button class="fpill" onclick="fAStatus('error',this)">❌ Erreur</button>
+          <button class="fpill" onclick="fAStatus('pending',this)">⏳ Attente</button>
+          <button class="fpill" onclick="fAStatus('static',this)">📄 Statiques</button>
+          <button class="fpill" onclick="fAStatus('fullstack',this)">⚡ Fullstack</button>
+        </div>
+        <table>
+          <thead><tr><th>Application</th><th>Propriétaire</th><th>Type</th><th>Statut</th><th>Domaine</th><th>Déploiements</th><th>Créée</th><th>Actions</th></tr></thead>
+          <tbody id="aBody"><tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--text-muted)"><i class="fa-solid fa-spinner fa-spin"></i></td></tr></tbody>
+        </table>
+        <div class="pgn" id="aPgn"></div>
+      </div>
+    </section>
+
+    <!-- ══════════════ SECTION DEPLOYMENTS ══════════════ -->
+    <section id="sec-deploys" class="section">
+      <div class="dtw">
+        <div class="dth"><span class="dth-t"><i class="fa-solid fa-rocket" style="color:var(--accent)"></i>Historique des déploiements</span></div>
+        <table>
+          <thead><tr><th>Application</th><th>Propriétaire</th><th>Version</th><th>Statut</th><th>Durée build</th><th>Date</th></tr></thead>
+          <tbody id="dBody"><tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--text-muted)"><i class="fa-solid fa-spinner fa-spin"></i></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════ SECTION STORAGE ══════════════ -->
+    <section id="sec-storage" class="section">
+      <!-- NOTA : Pas de limite affichée — infrastructure libre -->
+      <div class="kpi-grid">
+        <div class="kpi blue"><div class="kpi-lbl">Stockage utilisé</div><div class="kpi-val" id="sUsed">—</div><div class="kpi-sub" id="sSub">Calcul en cours...</div><div class="kpi-ico"><i class="fa-solid fa-hard-drive"></i></div></div>
+        <div class="kpi orange"><div class="kpi-lbl">Déploiements stockés</div><div class="kpi-val" id="sFiles">—</div><div class="kpi-ico"><i class="fa-solid fa-file-zipper"></i></div></div>
+        <div class="kpi purple"><div class="kpi-lbl">Applications</div><div class="kpi-val" id="sApps">—</div><div class="kpi-ico"><i class="fa-solid fa-folder-open"></i></div></div>
+        <div class="kpi green"><div class="kpi-lbl">Utilisateurs actifs</div><div class="kpi-val" id="sUsers">—</div><div class="kpi-ico"><i class="fa-solid fa-users"></i></div></div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-title"><i class="fa-solid fa-hard-drive" style="color:var(--orange)"></i>Utilisation du stockage MinIO</div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:5px">
+          <span>0</span><span id="sPct" style="color:var(--text-primary);font-weight:700;font-family:var(--font-mono)">—</span><span>Total</span>
+        </div>
+        <div class="stor-track"><div class="stor-fill" id="sFill" style="width:0%"></div></div>
+        <div class="warn" style="margin-top:14px;margin-bottom:0">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>
+            ⚠️ Base de données PostgreSQL expire le <strong>10 avril 2026</strong>.
+            Migrez vers <a href="https://neon.tech" target="_blank">Neon.tech</a> — gratuit, sans expiration, même CONNECTION STRING.
+            Le stockage MinIO et les sites déployés ne sont <strong>PAS affectés</strong> par cette migration.
+          </span>
+        </div>
+      </div>
+
+      <div class="dtw">
+        <div class="dth"><span class="dth-t"><i class="fa-solid fa-trophy" style="color:var(--orange)"></i>Top utilisateurs par volume</span></div>
+        <table>
+          <thead><tr><th>Utilisateur</th><th>Apps</th><th>Déploiements</th><th>Volume estimé</th></tr></thead>
+          <tbody id="sTop"><tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted)"><i class="fa-solid fa-spinner fa-spin"></i></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════ SECTION ACTIVITY ══════════════ -->
+    <section id="sec-activity" class="section">
+      <div class="dtw">
+        <div class="dth"><span class="dth-t"><i class="fa-solid fa-list-ul" style="color:var(--accent)"></i>Journal d'activité complet</span></div>
+        <ul class="act-list" id="fullAct">
+          <li style="padding:1.5rem;text-align:center;color:var(--text-muted)"><i class="fa-solid fa-spinner fa-spin"></i></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Footer identique au dashboard -->
+    <footer class="site-footer site-footer--dashboard">
+      <span>☁️ Beny-Joe Cloud</span><span class="footer-sep">·</span>
+      <span>© 2026 khedim benyakhlef dit beny joe – Tous droits réservés</span><span class="footer-sep">·</span>
+      <a href="mailto:khedimbenyakhlef@gmail.com">khedimbenyakhlef@gmail.com</a>
+    </footer>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -8,11 +8,135 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="css/style.css"/>
+  <!-- Favicon identique à l'original -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0b0f'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-size='38' font-family='Arial'>☁️%3C/text%3E%3C/svg%3E"/>
+  <style>
+    /* ════════════════════════════════════════
+       DASHBOARD EXTRAS — hérite de style.css
+       Nouvelles sections : Monitoring, Historique
+    ════════════════════════════════════════ */
+
+    /* ── Bannière Admin (invisible par défaut) ── */
+    .admin-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(135deg, rgba(124,58,237,.14), rgba(79,141,255,.12));
+      border: 1px solid rgba(124,58,237,.25);
+      border-radius: var(--radius);
+      padding: 12px 18px; margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
+      animation: fadeIn .4s ease;
+    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:none} }
+    .admin-banner-info { font-size:13px; font-weight:600; color:#c4b5fd; }
+    .admin-banner-sub  { font-size:11px; color:var(--text-muted); margin-top:2px; }
+    .admin-banner-btn  {
+      display: inline-flex; align-items:center; gap:6px;
+      padding: 7px 14px;
+      background: rgba(124,58,237,.2); color:#a78bfa;
+      border: 1px solid rgba(124,58,237,.3);
+      border-radius: var(--radius-sm);
+      font-size: 12px; font-weight:700; font-family:var(--font-main);
+      text-decoration:none; transition:all .2s; white-space:nowrap;
+    }
+    .admin-banner-btn:hover { background:rgba(124,58,237,.4); color:#e9d5ff; }
+
+    /* ── Sub-tabs ── */
+    .sub-nav {
+      display: flex; gap: 2px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .stab {
+      display: flex; align-items:center; gap:7px;
+      padding: 9px 14px;
+      font-size: 13px; font-weight:600; color:var(--text-muted);
+      border: none; background:none; cursor:pointer;
+      border-bottom: 2px solid transparent; margin-bottom:-1px;
+      transition: all .15s; font-family:var(--font-main);
+    }
+    .stab:hover { color:var(--text-secondary); }
+    .stab.on { color:var(--accent); border-bottom-color:var(--accent); }
+
+    .spanel { display:none; }
+    .spanel.on { display:block; }
+
+    /* ── Monitoring cards (vue utilisateur) ── */
+    .mon-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px; margin-bottom: 10px;
+      display: flex; align-items:flex-start; gap: 14px;
+      transition: all .2s;
+      border-left: 3px solid transparent;
+    }
+    .mon-item:hover { border-color:var(--border-light); transform:translateX(2px); box-shadow:var(--shadow); }
+    .mon-item.s-active   { border-left-color:var(--green); }
+    .mon-item.s-running  { border-left-color:var(--green); }
+    .mon-item.s-error    { border-left-color:var(--red); }
+    .mon-item.s-building { border-left-color:var(--orange); }
+    .mon-item.s-pending  { border-left-color:#555d78; }
+    .mon-item.s-stopped  { border-left-color:#555d78; }
+
+    .mon-ico {
+      width:42px; height:42px; border-radius:10px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; flex-shrink:0;
+    }
+    .mon-ico.active,.mon-ico.running { background:var(--green-glow); }
+    .mon-ico.error   { background:var(--red-glow); }
+    .mon-ico.building,.mon-ico.deploying { background:rgba(245,158,11,.15); }
+    .mon-ico.pending,.mon-ico.stopped   { background:rgba(85,93,120,.15); }
+
+    .mon-info { flex:1; min-width:0; }
+    .mon-name { font-size:15px; font-weight:700; color:var(--text-primary); }
+    .mon-url  { font-size:11px; color:var(--accent); font-family:var(--font-mono); margin-top:2px; word-break:break-all; }
+    .mon-url a { color:inherit; text-decoration:none; }
+    .mon-url a:hover { text-decoration:underline; }
+    .mon-meta { font-size:11px; color:var(--text-muted); font-family:var(--font-mono); margin-top:4px; }
+
+    .mon-right { display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; }
+
+    /* Uptime mini */
+    .up-mini { width:110px; }
+    .up-mini-lbl { display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-bottom:3px; }
+    .up-mini-track { height:3px; background:var(--bg-elevated); border-radius:2px; overflow:hidden; }
+    .up-mini-fill { height:100%; border-radius:2px; }
+    .ug { background:var(--green); }
+    .uo { background:var(--orange); }
+    .ur { background:var(--red); }
+
+    /* ── History ── */
+    .hist-wrap {
+      background:var(--bg-surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+    }
+    .hist-title {
+      font-size:13px; font-weight:700; color:var(--text-primary);
+      padding:13px 18px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:8px;
+    }
+    .hist-item {
+      display:flex; align-items:center; gap:12px;
+      padding:11px 18px;
+      border-bottom:1px solid rgba(42,47,69,.5);
+      font-size:12px;
+    }
+    .hist-item:last-child { border-bottom:none; }
+    .hist-icon { font-size:14px; flex-shrink:0; }
+    .hist-info { flex:1; }
+    .hist-name { font-weight:600; color:var(--text-primary); }
+    .hist-meta { font-size:10px; color:var(--text-muted); font-family:var(--font-mono); margin-top:1px; }
+    .hist-time { font-size:10px; color:var(--text-muted); font-family:var(--font-mono); white-space:nowrap; }
+
+    /* ── Stat card extra (erreur) ── */
+    .stat-icon.red { background:var(--red-glow); color:var(--red); }
+  </style>
 </head>
 <body class="dashboard-page">
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR — identique à l'original -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="brand-icon-sm"><i class="fa-solid fa-cloud-bolt"></i></div>
@@ -36,10 +160,10 @@
     </div>
   </aside>
 
-  <!-- MAIN -->
+  <!-- MAIN CONTENT -->
   <main class="main-content">
 
-    <!-- TOP BAR -->
+    <!-- TOP BAR — identique à l'original -->
     <header class="topbar">
       <button class="menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
       <div class="topbar-title" id="topbarTitle">Mes Applications</div>
@@ -49,8 +173,18 @@
       </div>
     </header>
 
-    <!-- SECTION: APPS -->
+    <!-- SECTION: APPS (AMÉLIORÉE) -->
     <section id="section-apps" class="section active">
+
+      <!-- Bannière admin — cachée par défaut, affichée si role=admin -->
+      <div id="adminBanner" class="admin-banner" style="display:none">
+        <div>
+          <div class="admin-banner-info"><i class="fa-solid fa-shield-halved"></i> Vous êtes administrateur de Beny-Joe Cloud</div>
+          <div class="admin-banner-sub">Gérez tous les utilisateurs, apps et déploiements depuis le panneau admin</div>
+        </div>
+        <a href="admin.html" class="admin-banner-btn"><i class="fa-solid fa-shield-halved"></i> Panneau Admin →</a>
+      </div>
+
       <div class="section-header">
         <div>
           <h2>Applications</h2>
@@ -61,8 +195,8 @@
         </button>
       </div>
 
-      <!-- STATS CARDS -->
-      <div class="stats-row">
+      <!-- STATS CARDS — 4 cartes (ajout erreurs) -->
+      <div class="stats-row" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
         <div class="stat-card">
           <div class="stat-icon"><i class="fa-solid fa-cubes"></i></div>
           <div class="stat-info">
@@ -84,55 +218,69 @@
             <span class="stat-label">Déployées</span>
           </div>
         </div>
-      </div>
-
-      <!-- APPS LIST -->
-      <div id="appsList" class="apps-grid">
-        <div class="loading-state">
-          <i class="fa-solid fa-spinner fa-spin"></i>
-          <p>Chargement...</p>
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fa-solid fa-circle-xmark"></i></div>
+          <div class="stat-info">
+            <span class="stat-value" id="statErrors">0</span>
+            <span class="stat-label">Erreurs</span>
+          </div>
         </div>
       </div>
+
+      <!-- SUB-NAVIGATION : Apps / Monitoring / Historique -->
+      <div class="sub-nav">
+        <button class="stab on" onclick="switchTab('list',this)">
+          <i class="fa-solid fa-cubes"></i> Mes Apps
+        </button>
+        <button class="stab" onclick="switchTab('monitoring',this)">
+          <i class="fa-solid fa-satellite-dish"></i> Monitoring
+        </button>
+        <button class="stab" onclick="switchTab('history',this)">
+          <i class="fa-solid fa-clock-rotate-left"></i> Historique
+        </button>
+      </div>
+
+      <!-- TAB: Liste des apps -->
+      <div id="tab-list" class="spanel on">
+        <div id="appsList" class="apps-grid">
+          <div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Chargement...</p></div>
+        </div>
+      </div>
+
+      <!-- TAB: Monitoring -->
+      <div id="tab-monitoring" class="spanel">
+        <div id="monList">
+          <div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Chargement du monitoring...</p></div>
+        </div>
+      </div>
+
+      <!-- TAB: Historique -->
+      <div id="tab-history" class="spanel">
+        <div class="hist-wrap" id="histWrap">
+          <div class="hist-title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--accent)"></i>Derniers déploiements</div>
+          <div class="loading-state" style="padding:2rem"><i class="fa-solid fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
     </section>
 
-    <!-- SECTION: STATS -->
+    <!-- SECTION: STATS — identique à l'original -->
     <section id="section-stats" class="section">
       <div class="section-header">
-        <div>
-          <h2>Statistiques</h2>
-          <p class="section-sub">Vue d'ensemble de votre activité</p>
-        </div>
+        <div><h2>Statistiques</h2><p class="section-sub">Vue d'ensemble de votre activité</p></div>
       </div>
       <div class="stats-full">
-        <div class="stat-card-lg">
-          <i class="fa-solid fa-cubes"></i>
-          <div class="stat-value" id="statsApps">0</div>
-          <div class="stat-label">Applications</div>
-        </div>
-        <div class="stat-card-lg green">
-          <i class="fa-solid fa-bolt"></i>
-          <div class="stat-value" id="statsFunctions">0</div>
-          <div class="stat-label">Fonctions serverless</div>
-        </div>
-        <div class="stat-card-lg blue">
-          <i class="fa-solid fa-database"></i>
-          <div class="stat-value" id="statsDbs">0</div>
-          <div class="stat-label">Bases de données</div>
-        </div>
+        <div class="stat-card-lg"><i class="fa-solid fa-cubes"></i><div class="stat-value" id="statsApps">0</div><div class="stat-label">Applications</div></div>
+        <div class="stat-card-lg green"><i class="fa-solid fa-bolt"></i><div class="stat-value" id="statsFunctions">0</div><div class="stat-label">Fonctions serverless</div></div>
+        <div class="stat-card-lg blue"><i class="fa-solid fa-database"></i><div class="stat-value" id="statsDbs">0</div><div class="stat-label">Bases de données</div></div>
       </div>
-      <div class="info-box">
-        <i class="fa-solid fa-circle-info"></i>
-        <p>Les métriques détaillées (requêtes, temps de réponse, CPU) seront disponibles avec un plan payant.</p>
-      </div>
+      <div class="info-box"><i class="fa-solid fa-circle-info"></i><p>Les métriques détaillées (requêtes, temps de réponse, CPU) seront disponibles avec un plan payant.</p></div>
     </section>
 
-    <!-- SECTION: PROFILE -->
+    <!-- SECTION: PROFILE — identique à l'original -->
     <section id="section-profile" class="section">
       <div class="section-header">
-        <div>
-          <h2>Mon Profil</h2>
-          <p class="section-sub">Vos informations personnelles</p>
-        </div>
+        <div><h2>Mon Profil</h2><p class="section-sub">Vos informations personnelles</p></div>
       </div>
       <div class="profile-card">
         <div class="profile-avatar" id="profileAvatar">?</div>
@@ -142,189 +290,241 @@
           <span class="badge" id="profilePlan">Free</span>
         </div>
       </div>
-      <div class="info-box">
-        <i class="fa-solid fa-shield-halved"></i>
-        <p>Compte sécurisé avec JWT. Token stocké localement et expirant automatiquement.</p>
-      </div>
+      <div class="info-box"><i class="fa-solid fa-shield-halved"></i><p>Compte sécurisé avec JWT. Token stocké localement et expirant automatiquement.</p></div>
     </section>
 
   </main>
 
-  <!-- TOAST -->
+  <!-- TOAST — identique à l'original -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- MODAL: CREATE APP -->
+  <!-- ════════════ MODALS — identiques à l'original ════════ -->
+
   <div class="modal-overlay" id="createAppModal">
     <div class="modal">
-      <div class="modal-header">
-        <h3>Nouvelle Application</h3>
-        <button class="modal-close" onclick="closeModal('createAppModal')"><i class="fa-solid fa-xmark"></i></button>
-      </div>
+      <div class="modal-header"><h3>Nouvelle Application</h3><button class="modal-close" onclick="closeModal('createAppModal')"><i class="fa-solid fa-xmark"></i></button></div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Nom de l'application</label>
-          <input type="text" id="newAppName" placeholder="mon-super-projet" />
-        </div>
-        <div class="form-group">
-          <label>Type</label>
-          <select id="newAppType" onchange="toggleRuntime()">
-            <option value="static">Site statique</option>
-            <option value="fullstack">Full-stack</option>
-          </select>
-        </div>
-        <div class="form-group" id="runtimeGroup" style="display:none">
-          <label>Runtime</label>
-          <select id="newAppRuntime">
-            <option value="nodejs18">Node.js 18</option>
-            <option value="nodejs20">Node.js 20</option>
-            <option value="python311">Python 3.11</option>
-            <option value="php82">PHP 8.2</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Description (optionnel)</label>
-          <input type="text" id="newAppDesc" placeholder="Description de votre application" />
-        </div>
+        <div class="form-group"><label>Nom de l'application</label><input type="text" id="newAppName" placeholder="mon-super-projet"/></div>
+        <div class="form-group"><label>Type</label><select id="newAppType" onchange="toggleRuntime()"><option value="static">Site statique</option><option value="fullstack">Full-stack</option></select></div>
+        <div class="form-group" id="runtimeGroup" style="display:none"><label>Runtime</label><select id="newAppRuntime"><option value="nodejs18">Node.js 18</option><option value="nodejs20">Node.js 20</option><option value="python311">Python 3.11</option><option value="php82">PHP 8.2</option></select></div>
+        <div class="form-group"><label>Description (optionnel)</label><input type="text" id="newAppDesc" placeholder="Description de votre application"/></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="closeModal('createAppModal')">Annuler</button>
-        <button class="btn-primary" onclick="createApp()">
-          <i class="fa-solid fa-plus"></i> Créer
-        </button>
-      </div>
+      <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('createAppModal')">Annuler</button><button class="btn-primary" onclick="createApp()"><i class="fa-solid fa-plus"></i> Créer</button></div>
     </div>
   </div>
 
-  <!-- MODAL: DEPLOY -->
   <div class="modal-overlay" id="deployModal">
     <div class="modal">
-      <div class="modal-header">
-        <h3>Déployer <span id="deployAppName"></span></h3>
-        <button class="modal-close" onclick="closeModal('deployModal')"><i class="fa-solid fa-xmark"></i></button>
-      </div>
+      <div class="modal-header"><h3>Déployer <span id="deployAppName"></span></h3><button class="modal-close" onclick="closeModal('deployModal')"><i class="fa-solid fa-xmark"></i></button></div>
       <div class="modal-body">
         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('deployFile').click()">
-          <i class="fa-solid fa-cloud-arrow-up"></i>
-          <p>Cliquez ou glissez votre fichier ZIP ici</p>
+          <i class="fa-solid fa-cloud-arrow-up"></i><p>Cliquez ou glissez votre fichier ZIP ici</p>
           <span class="upload-hint">Format : .zip — Max 50MB</span>
           <input type="file" id="deployFile" accept=".zip" style="display:none" onchange="fileSelected(this)"/>
         </div>
-        <div id="selectedFile" style="display:none" class="selected-file">
-          <i class="fa-solid fa-file-zipper"></i>
-          <span id="selectedFileName"></span>
-          <button onclick="clearFile()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div id="deployProgress" style="display:none">
-          <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-          <p id="progressText" class="progress-text">Déploiement en cours...</p>
-        </div>
+        <div id="selectedFile" style="display:none" class="selected-file"><i class="fa-solid fa-file-zipper"></i><span id="selectedFileName"></span><button onclick="clearFile()"><i class="fa-solid fa-xmark"></i></button></div>
+        <div id="deployProgress" style="display:none"><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div><p id="progressText" class="progress-text">Déploiement en cours...</p></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="closeModal('deployModal')">Annuler</button>
-        <button class="btn-primary" id="deployBtn" onclick="deployApp()">
-          <i class="fa-solid fa-rocket"></i> Déployer
-        </button>
-      </div>
+      <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('deployModal')">Annuler</button><button class="btn-primary" id="deployBtn" onclick="deployApp()"><i class="fa-solid fa-rocket"></i> Déployer</button></div>
     </div>
   </div>
 
-  <!-- MODAL: ENV VARS -->
   <div class="modal-overlay" id="envModal">
     <div class="modal modal-lg">
-      <div class="modal-header">
-        <h3>Variables d'environnement — <span id="envAppName"></span></h3>
-        <button class="modal-close" onclick="closeModal('envModal')"><i class="fa-solid fa-xmark"></i></button>
-      </div>
+      <div class="modal-header"><h3>Variables d'environnement — <span id="envAppName"></span></h3><button class="modal-close" onclick="closeModal('envModal')"><i class="fa-solid fa-xmark"></i></button></div>
       <div class="modal-body">
         <div id="envList" class="env-list"></div>
-        <div class="env-add">
-          <h4><i class="fa-solid fa-plus"></i> Ajouter une variable</h4>
-          <div class="env-form">
-            <input type="text" id="newEnvKey" placeholder="CLE" class="env-key"/>
-            <input type="text" id="newEnvValue" placeholder="valeur" class="env-value"/>
-            <label class="env-secret">
-              <input type="checkbox" id="newEnvSecret"/> Secret
-            </label>
-            <button class="btn-primary btn-sm" onclick="addEnvVar()">Ajouter</button>
-          </div>
+        <div class="env-add"><h4><i class="fa-solid fa-plus"></i> Ajouter une variable</h4>
+          <div class="env-form"><input type="text" id="newEnvKey" placeholder="CLE" class="env-key"/><input type="text" id="newEnvValue" placeholder="valeur" class="env-value"/><label class="env-secret"><input type="checkbox" id="newEnvSecret"/> Secret</label><button class="btn-primary btn-sm" onclick="addEnvVar()">Ajouter</button></div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="closeModal('envModal')">Fermer</button>
-      </div>
+      <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('envModal')">Fermer</button></div>
     </div>
   </div>
 
-  <!-- MODAL: FUNCTIONS -->
   <div class="modal-overlay" id="functionsModal">
     <div class="modal modal-lg">
-      <div class="modal-header">
-        <h3>Fonctions Serverless — <span id="funcAppName"></span></h3>
-        <button class="modal-close" onclick="closeModal('functionsModal')"><i class="fa-solid fa-xmark"></i></button>
-      </div>
+      <div class="modal-header"><h3>Fonctions Serverless — <span id="funcAppName"></span></h3><button class="modal-close" onclick="closeModal('functionsModal')"><i class="fa-solid fa-xmark"></i></button></div>
       <div class="modal-body">
         <div id="funcList" class="func-list"></div>
-        <div class="func-add">
-          <h4><i class="fa-solid fa-plus"></i> Nouvelle fonction</h4>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Nom</label>
-              <input type="text" id="newFuncName" placeholder="ma-fonction" />
-            </div>
-            <div class="form-group">
-              <label>Runtime</label>
-              <select id="newFuncRuntime">
-                <option value="nodejs18">Node.js 18</option>
-                <option value="python311">Python 3.11</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Code</label>
-            <textarea id="newFuncCode" class="code-editor" placeholder="// exports.handler = async (event) => { return { status: 200 }; }"></textarea>
-          </div>
-          <button class="btn-primary" onclick="createFunction()">
-            <i class="fa-solid fa-plus"></i> Créer la fonction
-          </button>
+        <div class="func-add"><h4><i class="fa-solid fa-plus"></i> Nouvelle fonction</h4>
+          <div class="form-row"><div class="form-group"><label>Nom</label><input type="text" id="newFuncName" placeholder="ma-fonction"/></div><div class="form-group"><label>Runtime</label><select id="newFuncRuntime"><option value="nodejs18">Node.js 18</option><option value="python311">Python 3.11</option></select></div></div>
+          <div class="form-group"><label>Code</label><textarea id="newFuncCode" class="code-editor" placeholder="// exports.handler = async (event) => { return { status: 200 }; }"></textarea></div>
+          <button class="btn-primary" onclick="createFunction()"><i class="fa-solid fa-plus"></i> Créer la fonction</button>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="closeModal('functionsModal')">Fermer</button>
-      </div>
+      <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('functionsModal')">Fermer</button></div>
     </div>
   </div>
 
-  <!-- MODAL: CONFIRM DELETE -->
   <div class="modal-overlay" id="deleteModal">
     <div class="modal modal-sm">
-      <div class="modal-header">
-        <h3>Supprimer l'application</h3>
-        <button class="modal-close" onclick="closeModal('deleteModal')"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="modal-body">
-        <p>Êtes-vous sûr de vouloir supprimer <strong id="deleteAppName"></strong> ?</p>
-        <p class="text-danger">Cette action est irréversible.</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="closeModal('deleteModal')">Annuler</button>
-        <button class="btn-danger" onclick="confirmDelete()">
-          <i class="fa-solid fa-trash"></i> Supprimer
-        </button>
-      </div>
+      <div class="modal-header"><h3>Supprimer l'application</h3><button class="modal-close" onclick="closeModal('deleteModal')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal-body"><p>Êtes-vous sûr de vouloir supprimer <strong id="deleteAppName"></strong> ?</p><p class="text-danger">Cette action est irréversible.</p></div>
+      <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('deleteModal')">Annuler</button><button class="btn-danger" onclick="confirmDelete()"><i class="fa-solid fa-trash"></i> Supprimer</button></div>
     </div>
   </div>
 
+  <!-- Footer identique à l'original -->
   <footer class="site-footer site-footer--dashboard">
-    <span>☁️ Beny-Joe Cloud</span>
-    <span class="footer-sep">·</span>
-    <span>© 2026 khedim benyakhlef dit beny joe – Tous droits réservés</span>
-    <span class="footer-sep">·</span>
+    <span>☁️ Beny-Joe Cloud</span><span class="footer-sep">·</span>
+    <span>© 2026 khedim benyakhlef dit beny joe – Tous droits réservés</span><span class="footer-sep">·</span>
     <a href="mailto:khedimbenyakhlef@gmail.com">khedimbenyakhlef@gmail.com</a>
   </footer>
 
   <script src="js/api.js"></script>
   <script src="js/dashboard.js"></script>
+
+  <!-- ════ EXTENSIONS — s'injectent APRÈS dashboard.js ════ -->
+  <script>
+  'use strict';
+  const _API = 'https://bjc-v4.onrender.com';
+
+  // ── Vérifie rôle admin au chargement ──────────────────────
+  document.addEventListener('DOMContentLoaded', async () => {
+    const token = getToken();
+    if (!token) return;
+    try {
+      const user = await Auth.me();
+      if (user && user.role === 'admin') {
+        document.getElementById('adminBanner').style.display = 'flex';
+      }
+    } catch(e) {}
+  });
+
+  // ── Surcharge updateStats : ajoute stat erreurs ───────────
+  const _origStats = window.updateStats;
+  window.updateStats = function(apps) {
+    if (_origStats) _origStats(apps);
+    const errors = apps.filter(a => a.status === 'error').length;
+    document.getElementById('statErrors').textContent = errors;
+    document.getElementById('statsApps').textContent  = apps.length;
+  };
+
+  // ── Sub-tabs ──────────────────────────────────────────────
+  function switchTab(name, btn) {
+    document.querySelectorAll('.spanel').forEach(p => p.classList.remove('on'));
+    document.querySelectorAll('.stab').forEach(b => b.classList.remove('on'));
+    document.getElementById(`tab-${name}`).classList.add('on');
+    btn.classList.add('on');
+    if (name === 'monitoring') loadUserMonitoring();
+    if (name === 'history')    loadUserHistory();
+  }
+
+  // ── Monitoring utilisateur ────────────────────────────────
+  async function loadUserMonitoring() {
+    const c = document.getElementById('monList');
+    c.innerHTML = '<div class="loading-state" style="padding:2rem"><i class="fa-solid fa-spinner fa-spin"></i><p>Chargement...</p></div>';
+    try {
+      const data = await Apps.list();
+      const apps = Array.isArray(data) ? data : (data.apps || []);
+      if (!apps.length) {
+        c.innerHTML = '<div class="empty-state"><i class="fa-solid fa-satellite-dish"></i><h3>Aucune application</h3><p>Créez votre première application pour voir le monitoring</p></div>';
+        return;
+      }
+      const sConf = {
+        active:    { cls:'active',    icon:'🟢', lbl:'En ligne',    up:99, ufc:'ug' },
+        running:   { cls:'running',   icon:'🟢', lbl:'En ligne',    up:99, ufc:'ug' },
+        error:     { cls:'error',     icon:'🔴', lbl:'Erreur',      up:0,  ufc:'ur' },
+        building:  { cls:'building',  icon:'⚙️', lbl:'Build...',    up:50, ufc:'uo' },
+        deploying: { cls:'deploying', icon:'⚙️', lbl:'Déploiement', up:50, ufc:'uo' },
+        pending:   { cls:'pending',   icon:'⏳', lbl:'En attente',  up:75, ufc:'uo' },
+        stopped:   { cls:'stopped',   icon:'⏸️', lbl:'Arrêtée',     up:0,  ufc:'ur' },
+      };
+      const sBadge = {
+        active:'badge-running', running:'badge-running', error:'badge-error',
+        building:'badge-deploying', deploying:'badge-deploying',
+        pending:'badge-stopped', stopped:'badge-stopped',
+      };
+
+      c.innerHTML = apps.map(app => {
+        const s = sConf[app.status] || sConf.pending;
+        const siteUrl = `${_API}/site/${escHtml(app.slug||app.name)}/`;
+        return `
+          <div class="mon-item s-${s.cls}">
+            <div class="mon-ico ${s.cls}">${s.icon}</div>
+            <div class="mon-info">
+              <div class="mon-name">${escHtml(app.name)}</div>
+              <div class="mon-url"><a href="${siteUrl}" target="_blank">${siteUrl}</a></div>
+              <div class="mon-meta">
+                ${app.app_type==='static'?'📄 Statique':'⚡ Fullstack'}
+                ${app.runtime?` · <code>${escHtml(app.runtime)}</code>`:''}
+                · ${app.deployment_count||0} déploiement${(app.deployment_count||0)!==1?'s':''}
+              </div>
+            </div>
+            <div class="mon-right">
+              <span class="app-badge ${sBadge[app.status]||'badge-stopped'}" style="font-size:10px">${s.lbl}</span>
+              <div class="up-mini">
+                <div class="up-mini-lbl"><span>Uptime</span><strong style="font-family:var(--font-mono)">${s.up}%</strong></div>
+                <div class="up-mini-track"><div class="up-mini-fill ${s.ufc}" style="width:${s.up}%"></div></div>
+              </div>
+              <div style="display:flex;gap:5px">
+                ${['active','running'].includes(app.status)?`<a href="${siteUrl}" target="_blank" class="btn-icon green" title="Voir le site" style="text-decoration:none"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>`:''}
+                <button class="btn-icon accent" title="Déployer" onclick="openDeploy('${app.id}','${escHtml(app.name)}')"><i class="fa-solid fa-rocket"></i></button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch(err) {
+      c.innerHTML = `<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><h3>Erreur</h3><p>${err.message}</p></div>`;
+    }
+  }
+
+  // ── Historique déploiements ───────────────────────────────
+  async function loadUserHistory() {
+    const wrap = document.getElementById('histWrap');
+    wrap.innerHTML = `
+      <div class="hist-title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--accent)"></i>Derniers déploiements</div>
+      <div class="loading-state" style="padding:2rem"><i class="fa-solid fa-spinner fa-spin"></i></div>
+    `;
+    try {
+      const data = await Apps.list();
+      const apps = Array.isArray(data) ? data : (data.apps || []);
+      if (!apps.length) {
+        wrap.innerHTML = `<div class="hist-title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--accent)"></i>Derniers déploiements</div><div class="empty-state" style="padding:2rem"><i class="fa-solid fa-clock-rotate-left"></i><h3>Aucun déploiement</h3><p>Déployez votre première app pour voir l'historique</p></div>`;
+        return;
+      }
+
+      const allDeploys = [];
+      await Promise.all(apps.map(async app => {
+        try {
+          const r = await apiFetch(`/api/apps/${app.id}/deployments`);
+          const dl = Array.isArray(r) ? r : (r.deployments || []);
+          dl.forEach(d => allDeploys.push({ ...d, app_name:app.name, app_slug:app.slug||app.name }));
+        } catch(e) {}
+      }));
+      allDeploys.sort((a,b) => new Date(b.created_at)-new Date(a.created_at));
+
+      const sIcon  = { deployed:'✅', success:'✅', failed:'❌', queued:'⏳', building:'⚙️' };
+      const sBadge = { deployed:'badge-running', success:'badge-running', failed:'badge-error', queued:'badge-stopped', building:'badge-deploying' };
+
+      const rows = allDeploys.slice(0,30).map(d => `
+        <div class="hist-item">
+          <div class="hist-icon">${sIcon[d.status]||'📦'}</div>
+          <div class="hist-info">
+            <div class="hist-name">${escHtml(d.app_name)}</div>
+            <div class="hist-meta">v${escHtml((d.version_id||'').substring(0,8))}${d.build_duration?` · ${d.build_duration}s`:''}</div>
+          </div>
+          <span class="app-badge ${sBadge[d.status]||'badge-stopped'}" style="font-size:10px">${escHtml(d.status)}</span>
+          <div class="hist-time">${fmtDate(d.created_at)}</div>
+        </div>
+      `).join('');
+
+      wrap.innerHTML = `
+        <div class="hist-title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--accent)"></i>Derniers déploiements <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);font-weight:400">(${allDeploys.length} total)</span></div>
+        ${rows || '<div style="padding:1.5rem;text-align:center;color:var(--text-muted)">Aucun déploiement</div>'}
+      `;
+    } catch(err) {
+      wrap.innerHTML = `<div class="hist-title">Erreur</div><div style="padding:1.5rem;text-align:center;color:var(--red)">${err.message}</div>`;
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────
+  function fmtDate(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleString('fr-FR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+  }
+  </script>
 </body>
 </html>
